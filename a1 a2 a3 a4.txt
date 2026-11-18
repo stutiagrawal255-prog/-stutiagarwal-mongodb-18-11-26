@@ -1,0 +1,900 @@
+Windows PowerShell 5.1
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\stuti agrawal> mongosh
+Current Mongosh Log ID: 6afd504c39fa8364c27b2f64
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.10.0
+Using MongoDB:          8.3.11
+Using Mongosh:          2.10.0
+mongosh 2.14.0 is available for download: https://www.mongodb.com/try/download/shell
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2026-11-04T12:30:11.498+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+test> use shopDB
+switched to db shopDB
+shopDB> db.products.insertMany([
+| {_id:1,name:"Wireless Mouse",category:"Accessories",price:800,stock:50,discontinued:false,oldCode:"WM-01"},
+| {_id:2,name:"Keyboard",category:"Accessories",price:1500,stock:30,discontinued:false,oldCode:"KB-02"},
+| {_id:3,name:"USB Cable",category:"Accessories",price:200,stock:100,discontinued:false},
+| {_id:4,name:"Laptop",category:"Computers",price:55000,stock:10,discontinued:false},
+| {_id:5,name:"Monitor",category:"Computers",price:12000,stock:15,discontinued:false},
+| {_id:6,name:"Old Floppy Drive",category:"Computers",price:300,stock:0,discontinued:true},
+| {_id:7,name:"Dial-up Modem",category:"Computers",price:500,stock:0,discontinued:true},
+| {_id:8,name:"CD Drive",category:"Computers",price:400,stock:0,discontinued:true}
+| ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5, '5': 6, '6': 7, '7': 8 }
+}
+shopDB> db.products.updateOne(
+| {name:"Keyboard"},
+| {$set:{price:1400}}
+| )
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+shopDB> db.products.updateOne(
+| {name:"Wireless Mouse"},
+| {$inc:{stock:25}}
+| )
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+shopDB> db.products.updateMany(
+| {},
+| {$unset:{oldCode:""}}
+| )
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 8,
+  modifiedCount: 2,
+  upsertedCount: 0
+}
+shopDB> db.products.replaceOne(
+| {_id:3},
+| {
+| _id:3,
+| name:"USB-C Cable",
+| category:"Accessories",
+| price:350,
+| stock:100,
+| discontinued:false
+| }
+| )
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+shopDB> db.products.deleteOne({name:"Old Floppy Drive"})
+{ acknowledged: true, deletedCount: 1 }
+shopDB> db.products.deleteMany({discontinued:true})
+{ acknowledged: true, deletedCount: 2 }
+shopDB> db.products.aggregate([
+|   {$match:{price:{$gte:500}}},
+|   {$group:{
+|     _id:"$category",
+|     totalStock:{$sum:"$stock"},
+|     averagePrice:{$avg:"$price"}
+|   }},
+|   {$sort:{totalStock:-1}}
+| ])
+[
+  { _id: 'Accessories', totalStock: 105, averagePrice: 1100 },
+  { _id: 'Computers', totalStock: 25, averagePrice: 33500 }
+]
+shopDB> use collegeDB
+switched to db collegeDB
+collegeDB> db.students.insertOne({
+|   _id:101,
+|   name:"Arun",
+|   dept:"CSE",
+|   marks:78,
+|   scores:[
+|     {subject:"DBMS",mark:85},
+|     {subject:"Maths",mark:70}
+|   ]
+| })
+{ acknowledged: true, insertedId: 101 }
+collegeDB> db.students.insertOne({
+|   _id:101,
+|   name:"Rahul",
+|   dept:"IT",
+|   marks:65,
+|   scores:[
+|     {subject:"DBMS",mark:60},
+|     {subject:"Maths",mark:72}
+|   ]
+| })
+MongoServerError: E11000 duplicate key error collection: collegeDB.students index: _id_ dup key: { _id: 101 }
+collegeDB> db.students.insertMany([
+| {
+|   _id:102,
+|   name:"Bala",
+|   dept:"IT",
+|   marks:65,
+|   scores:[
+|     {subject:"DBMS",mark:60},
+|     {subject:"Maths",mark:72}
+|   ]
+| },
+| {
+|   _id:103,
+|   name:"Chitra",
+|   dept:"CSE",
+|   marks:91,
+|   scores:[
+|     {subject:"DBMS",mark:95},
+|     {subject:"Maths",mark:87}
+|   ]
+| },
+| {
+|   _id:104,
+|   name:"Divya",
+|   dept:"ECE",
+|   marks:72,
+|   scores:[
+|     {subject:"DBMS",mark:55},
+|     {subject:"Maths",mark:89}
+|   ]
+| },
+| {
+|   _id:105,
+|   name:"Eswar",
+|   dept:"IT",
+|   marks:84,
+|   scores:[
+|     {subject:"DBMS",mark:88},
+|     {subject:"Maths",mark:80}
+|   ]
+| },
+| {
+|   _id:106,
+|   name:"Farah",
+|   dept:"CSE",
+|   marks:59,
+|   scores:[
+|     {subject:"DBMS",mark:45},
+|     {subject:"Maths",mark:73}
+|   ]
+| }
+| ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 102, '1': 103, '2': 104, '3': 105, '4': 106 }
+}
+collegeDB> db.students.find({dept:"CSE"})
+[
+  {
+    _id: 101,
+    name: 'Arun',
+    dept: 'CSE',
+    marks: 78,
+    scores: [ { subject: 'DBMS', mark: 85 }, { subject: 'Maths', mark: 70 } ]
+  },
+  {
+    _id: 103,
+    name: 'Chitra',
+    dept: 'CSE',
+    marks: 91,
+    scores: [ { subject: 'DBMS', mark: 95 }, { subject: 'Maths', mark: 87 } ]
+  },
+  {
+    _id: 106,
+    name: 'Farah',
+    dept: 'CSE',
+    marks: 59,
+    scores: [ { subject: 'DBMS', mark: 45 }, { subject: 'Maths', mark: 73 } ]
+  }
+]
+collegeDB> db.students.find({marks:{$gte:75}})
+[
+  {
+    _id: 101,
+    name: 'Arun',
+    dept: 'CSE',
+    marks: 78,
+    scores: [ { subject: 'DBMS', mark: 85 }, { subject: 'Maths', mark: 70 } ]
+  },
+  {
+    _id: 103,
+    name: 'Chitra',
+    dept: 'CSE',
+    marks: 91,
+    scores: [ { subject: 'DBMS', mark: 95 }, { subject: 'Maths', mark: 87 } ]
+  },
+  {
+    _id: 105,
+    name: 'Eswar',
+    dept: 'IT',
+    marks: 84,
+    scores: [ { subject: 'DBMS', mark: 88 }, { subject: 'Maths', mark: 80 } ]
+  }
+]
+collegeDB> db.students.find({
+|   dept:{$in:["CSE","IT"]}
+| })
+[
+  {
+    _id: 101,
+    name: 'Arun',
+    dept: 'CSE',
+    marks: 78,
+    scores: [ { subject: 'DBMS', mark: 85 }, { subject: 'Maths', mark: 70 } ]
+  },
+  {
+    _id: 102,
+    name: 'Bala',
+    dept: 'IT',
+    marks: 65,
+    scores: [ { subject: 'DBMS', mark: 60 }, { subject: 'Maths', mark: 72 } ]
+  },
+  {
+    _id: 103,
+    name: 'Chitra',
+    dept: 'CSE',
+    marks: 91,
+    scores: [ { subject: 'DBMS', mark: 95 }, { subject: 'Maths', mark: 87 } ]
+  },
+  {
+    _id: 105,
+    name: 'Eswar',
+    dept: 'IT',
+    marks: 84,
+    scores: [ { subject: 'DBMS', mark: 88 }, { subject: 'Maths', mark: 80 } ]
+  },
+  {
+    _id: 106,
+    name: 'Farah',
+    dept: 'CSE',
+    marks: 59,
+    scores: [ { subject: 'DBMS', mark: 45 }, { subject: 'Maths', mark: 73 } ]
+  }
+]
+collegeDB> db.students.find({
+|   "scores.subject":"DBMS",
+|   "scores.mark":{$gt:80}
+| })
+[
+  {
+    _id: 101,
+    name: 'Arun',
+    dept: 'CSE',
+    marks: 78,
+    scores: [ { subject: 'DBMS', mark: 85 }, { subject: 'Maths', mark: 70 } ]
+  },
+  {
+    _id: 103,
+    name: 'Chitra',
+    dept: 'CSE',
+    marks: 91,
+    scores: [ { subject: 'DBMS', mark: 95 }, { subject: 'Maths', mark: 87 } ]
+  },
+  {
+    _id: 104,
+    name: 'Divya',
+    dept: 'ECE',
+    marks: 72,
+    scores: [ { subject: 'DBMS', mark: 55 }, { subject: 'Maths', mark: 89 } ]
+  },
+  {
+    _id: 105,
+    name: 'Eswar',
+    dept: 'IT',
+    marks: 84,
+    scores: [ { subject: 'DBMS', mark: 88 }, { subject: 'Maths', mark: 80 } ]
+  }
+]
+collegeDB> db.students.find(
+| {},
+| {name:1,marks:1,_id:0}
+| )
+[
+  { name: 'Arun', marks: 78 },
+  { name: 'Bala', marks: 65 },
+  { name: 'Chitra', marks: 91 },
+  { name: 'Divya', marks: 72 },
+  { name: 'Eswar', marks: 84 },
+  { name: 'Farah', marks: 59 }
+]
+collegeDB> use companyDB
+switched to db companyDB
+companyDB> db.employees.insertMany([
+| {_id:1,name:"Anil",dept:"IT",city:"Chennai",salary:60000,skills:["MongoDB","Python"]},
+| {_id:2,name:"Bhavna",dept:"HR",city:"Mumbai",salary:45000,skills:["Excel","Communication"]},
+| {_id:3,name:"Charan",dept:"IT",city:"Chennai",salary:75000,skills:["Java","MongoDB"]},
+| {_id:4,name:"Deepa",dept:"Finance",city:"Pune",salary:52000,skills:["Excel","Tally"]},
+| {_id:5,name:"Elan",dept:"IT",city:"Bengaluru",salary:68000,skills:["Python","Docker"]},
+| {_id:6,name:"Farida",dept:"HR",city:"Delhi",salary:48000,skills:["Communication","Recruitment"]},
+| {_id:7,name:"Gokul",dept:"Finance",city:"Chennai",salary:58000,skills:["Tally","Excel"]},
+| {_id:8,name:"Hema",dept:"IT",city:"Pune",salary:82000,skills:["MongoDB","Kubernetes"]}
+| ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5, '5': 6, '6': 7, '7': 8 }
+}
+companyDB> db.employees.find({dept:"IT"}).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'companyDB.employees',
+    parsedQuery: { dept: { '$eq': 'IT' } },
+    indexFilterSet: false,
+    queryHash: '8BDC9605',
+    planCacheShapeHash: '8BDC9605',
+    planCacheKey: '3C7E0305',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { dept: { '$eq': 'IT' } },
+      nss: 'companyDB.employees',
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 4,
+    totalKeysExamined: 0,
+    totalDocsExamined: 8,
+    executionStages: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { dept: { '$eq': 'IT' } },
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 9,
+      advanced: 4,
+      needTime: 4,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      nss: 'companyDB.employees',
+      direction: 'forward',
+      docsExamined: 8
+    }
+  },
+  queryShapeHash: '478FFA23A9BCFA4DC93B73A9C29709A5E2E9BE8F183EBE3CC8AEAB4C6DDD14BB',
+  command: { find: 'employees', filter: { dept: 'IT' }, '$db': 'companyDB' },
+  serverInfo: {
+    host: 'LAPTOP-H03N3V98',
+    port: 27017,
+    version: '8.3.11',
+    gitVersion: 'b8b83d6e6e1aed495578ad8c6f9234ad329c9955'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+companyDB> db.employees.createIndex({dept:1})
+dept_1
+companyDB> use companyDB
+already on db companyDB
+companyDB> db.dropDatabase()
+{ ok: 1, dropped: 'companyDB' }
+companyDB> use companyDB
+already on db companyDB
+companyDB> db.employees.insertMany([
+| {_id:1,name:"Anil",dept:"IT",city:"Chennai",salary:60000,skills:["MongoDB","Python"]},
+| {_id:2,name:"Bhavna",dept:"HR",city:"Mumbai",salary:45000,skills:["Excel","Communication"]},
+| {_id:3,name:"Charan",dept:"IT",city:"Chennai",salary:75000,skills:["Java","MongoDB"]},
+| {_id:4,name:"Deepa",dept:"Finance",city:"Pune",salary:52000,skills:["Excel","Tally"]},
+| {_id:5,name:"Elan",dept:"IT",city:"Bengaluru",salary:68000,skills:["Python","Docker"]},
+| {_id:6,name:"Farida",dept:"HR",city:"Delhi",salary:48000,skills:["Communication","Recruitment"]},
+| {_id:7,name:"Gokul",dept:"Finance",city:"Chennai",salary:58000,skills:["Tally","Excel"]},
+| {_id:8,name:"Hema",dept:"IT",city:"Pune",salary:82000,skills:["MongoDB","Kubernetes"]}
+| ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5, '5': 6, '6': 7, '7': 8 }
+}
+companyDB> db.employees.find({dept:"IT"}).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'companyDB.employees',
+    parsedQuery: { dept: { '$eq': 'IT' } },
+    indexFilterSet: false,
+    queryHash: '8BDC9605',
+    planCacheShapeHash: '8BDC9605',
+    planCacheKey: '3C7E0305',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { dept: { '$eq': 'IT' } },
+      nss: 'companyDB.employees',
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 0,
+    totalKeysExamined: 0,
+    totalDocsExamined: 8,
+    executionStages: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { dept: { '$eq': 'IT' } },
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 9,
+      advanced: 4,
+      needTime: 4,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      nss: 'companyDB.employees',
+      direction: 'forward',
+      docsExamined: 8
+    }
+  },
+  queryShapeHash: '478FFA23A9BCFA4DC93B73A9C29709A5E2E9BE8F183EBE3CC8AEAB4C6DDD14BB',
+  command: { find: 'employees', filter: { dept: 'IT' }, '$db': 'companyDB' },
+  serverInfo: {
+    host: 'LAPTOP-H03N3V98',
+    port: 27017,
+    version: '8.3.11',
+    gitVersion: 'b8b83d6e6e1aed495578ad8c6f9234ad329c9955'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+companyDB> db.employees.createIndex({dept:1})
+dept_1
+companyDB> db.employees.find({dept:"IT"}).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'companyDB.employees',
+    parsedQuery: { dept: { '$eq': 'IT' } },
+    indexFilterSet: false,
+    queryHash: '8BDC9605',
+    planCacheShapeHash: '8BDC9605',
+    planCacheKey: '4FAC35CF',
+    optimizationTimeMillis: 28,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      nss: 'companyDB.employees',
+      inputStage: {
+        stage: 'IXSCAN',
+        nss: 'companyDB.employees',
+        keyPattern: { dept: 1 },
+        indexName: 'dept_1',
+        isMultiKey: false,
+        multiKeyPaths: { dept: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { dept: [ '["IT", "IT"]' ] }
+      }
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 35,
+    totalKeysExamined: 4,
+    totalDocsExamined: 4,
+    executionStages: {
+      isCached: false,
+      stage: 'FETCH',
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 5,
+      advanced: 4,
+      needTime: 0,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      nss: 'companyDB.employees',
+      docsExamined: 4,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        nReturned: 4,
+        executionTimeMillisEstimate: 0,
+        works: 5,
+        advanced: 4,
+        needTime: 0,
+        needYield: 0,
+        saveState: 0,
+        restoreState: 0,
+        isEOF: 1,
+        nss: 'companyDB.employees',
+        keyPattern: { dept: 1 },
+        indexName: 'dept_1',
+        isMultiKey: false,
+        multiKeyPaths: { dept: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { dept: [ '["IT", "IT"]' ] },
+        keysExamined: 4,
+        seeks: 1,
+        dupsTested: 0,
+        dupsDropped: 0,
+        peakTrackedMemBytes: 0
+      }
+    }
+  },
+  queryShapeHash: '478FFA23A9BCFA4DC93B73A9C29709A5E2E9BE8F183EBE3CC8AEAB4C6DDD14BB',
+  command: { find: 'employees', filter: { dept: 'IT' }, '$db': 'companyDB' },
+  serverInfo: {
+    host: 'LAPTOP-H03N3V98',
+    port: 27017,
+    version: '8.3.11',
+    gitVersion: 'b8b83d6e6e1aed495578ad8c6f9234ad329c9955'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+companyDB> db.employees.createIndex({dept:1,salary:-1})
+dept_1_salary_-1
+companyDB> db.employees.find({dept:"IT"}).sort({salary:-1})
+[
+  {
+    _id: 8,
+    name: 'Hema',
+    dept: 'IT',
+    city: 'Pune',
+    salary: 82000,
+    skills: [ 'MongoDB', 'Kubernetes' ]
+  },
+  {
+    _id: 3,
+    name: 'Charan',
+    dept: 'IT',
+    city: 'Chennai',
+    salary: 75000,
+    skills: [ 'Java', 'MongoDB' ]
+  },
+  {
+    _id: 5,
+    name: 'Elan',
+    dept: 'IT',
+    city: 'Bengaluru',
+    salary: 68000,
+    skills: [ 'Python', 'Docker' ]
+  },
+  {
+    _id: 1,
+    name: 'Anil',
+    dept: 'IT',
+    city: 'Chennai',
+    salary: 60000,
+    skills: [ 'MongoDB', 'Python' ]
+  }
+]
+companyDB> db.employees.find({dept:"IT"}).sort({salary:-1}).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'companyDB.employees',
+    parsedQuery: { dept: { '$eq': 'IT' } },
+    indexFilterSet: false,
+    queryHash: 'A717C20F',
+    planCacheShapeHash: 'A717C20F',
+    planCacheKey: '60407930',
+    optimizationTimeMillis: 27,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      nss: 'companyDB.employees',
+      inputStage: {
+        stage: 'IXSCAN',
+        nss: 'companyDB.employees',
+        keyPattern: { dept: 1, salary: -1 },
+        indexName: 'dept_1_salary_-1',
+        isMultiKey: false,
+        multiKeyPaths: { dept: [], salary: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { dept: [ '["IT", "IT"]' ], salary: [ '[MaxKey, MinKey]' ] }
+      }
+    },
+    rejectedPlans: [
+      {
+        isCached: false,
+        stage: 'SORT',
+        sortPattern: { salary: -1 },
+        memLimit: 104857600,
+        type: 'simple',
+        inputStage: {
+          stage: 'FETCH',
+          nss: 'companyDB.employees',
+          inputStage: {
+            stage: 'IXSCAN',
+            nss: 'companyDB.employees',
+            keyPattern: { dept: 1 },
+            indexName: 'dept_1',
+            isMultiKey: false,
+            multiKeyPaths: { dept: [] },
+            isUnique: false,
+            isSparse: false,
+            isPartial: false,
+            indexVersion: 2,
+            direction: 'forward',
+            indexBounds: { dept: [ '["IT", "IT"]' ] }
+          }
+        }
+      }
+    ]
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 27,
+    totalKeysExamined: 4,
+    totalDocsExamined: 4,
+    executionStages: {
+      isCached: false,
+      stage: 'FETCH',
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 6,
+      advanced: 4,
+      needTime: 0,
+      needYield: 0,
+      saveState: 1,
+      restoreState: 1,
+      isEOF: 1,
+      nss: 'companyDB.employees',
+      docsExamined: 4,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        nReturned: 4,
+        executionTimeMillisEstimate: 0,
+        works: 5,
+        advanced: 4,
+        needTime: 0,
+        needYield: 0,
+        saveState: 1,
+        restoreState: 1,
+        isEOF: 1,
+        nss: 'companyDB.employees',
+        keyPattern: { dept: 1, salary: -1 },
+        indexName: 'dept_1_salary_-1',
+        isMultiKey: false,
+        multiKeyPaths: { dept: [], salary: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { dept: [ '["IT", "IT"]' ], salary: [ '[MaxKey, MinKey]' ] },
+        keysExamined: 4,
+        seeks: 1,
+        dupsTested: 0,
+        dupsDropped: 0,
+        peakTrackedMemBytes: 0
+      }
+    }
+  },
+  queryShapeHash: 'F65BDC958A8CA475631FD93E8083B87A5F7CEB380FBEB0D050DEDE8B965A9580',
+  command: {
+    find: 'employees',
+    filter: { dept: 'IT' },
+    sort: { salary: -1 },
+    '$db': 'companyDB'
+  },
+  serverInfo: {
+    host: 'LAPTOP-H03N3V98',
+    port: 27017,
+    version: '8.3.11',
+    gitVersion: 'b8b83d6e6e1aed495578ad8c6f9234ad329c9955'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+companyDB> db.employees.createIndex({skills:1})
+skills_1
+companyDB> db.employees.find({skills:"MongoDB"})
+[
+  {
+    _id: 1,
+    name: 'Anil',
+    dept: 'IT',
+    city: 'Chennai',
+    salary: 60000,
+    skills: [ 'MongoDB', 'Python' ]
+  },
+  {
+    _id: 3,
+    name: 'Charan',
+    dept: 'IT',
+    city: 'Chennai',
+    salary: 75000,
+    skills: [ 'Java', 'MongoDB' ]
+  },
+  {
+    _id: 8,
+    name: 'Hema',
+    dept: 'IT',
+    city: 'Pune',
+    salary: 82000,
+    skills: [ 'MongoDB', 'Kubernetes' ]
+  }
+]
+companyDB> db.employees.hideIndex("skills_1")
+{ hidden_old: false, hidden_new: true, ok: 1 }
+companyDB> db.employees.find({skills:"MongoDB"}).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'companyDB.employees',
+    parsedQuery: { skills: { '$eq': 'MongoDB' } },
+    indexFilterSet: false,
+    queryHash: 'CF652545',
+    planCacheShapeHash: 'CF652545',
+    planCacheKey: '811F0374',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { skills: { '$eq': 'MongoDB' } },
+      nss: 'companyDB.employees',
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 3,
+    executionTimeMillis: 0,
+    totalKeysExamined: 0,
+    totalDocsExamined: 8,
+    executionStages: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: { skills: { '$eq': 'MongoDB' } },
+      nReturned: 3,
+      executionTimeMillisEstimate: 0,
+      works: 9,
+      advanced: 3,
+      needTime: 5,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      nss: 'companyDB.employees',
+      direction: 'forward',
+      docsExamined: 8
+    }
+  },
+  queryShapeHash: '67E511B1DA5D193EAFC4FBD234E6FBA76D0F4756BDEE1E1E1F3072DB3388CFB7',
+  command: {
+    find: 'employees',
+    filter: { skills: 'MongoDB' },
+    '$db': 'companyDB'
+  },
+  serverInfo: {
+    host: 'LAPTOP-H03N3V98',
+    port: 27017,
+    version: '8.3.11',
+    gitVersion: 'b8b83d6e6e1aed495578ad8c6f9234ad329c9955'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+companyDB> db.employees.unhideIndex("skills_1")
+{ hidden_old: true, hidden_new: false, ok: 1 }
+companyDB> db.employees.createIndex({city:1},{unique:true})
+MongoServerError[DuplicateKey]: Index build failed: a74eb4b7-c7e8-494b-ae17-f5c645b87988: Collection companyDB.employees ( 790f9a8b-7741-4f42-84fd-b44f04d27d7f ) :: caused by :: E11000 duplicate key error collection: companyDB.employees index: city_1 dup key: { city: "Chennai" }
+companyDB> db.employees.createIndex({name:1},{unique:true})
+name_1
+companyDB> db.employees.getIndexes()
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { dept: 1 }, name: 'dept_1' },
+  { v: 2, key: { dept: 1, salary: -1 }, name: 'dept_1_salary_-1' },
+  { v: 2, key: { skills: 1 }, name: 'skills_1' },
+  { v: 2, key: { name: 1 }, name: 'name_1', unique: true }
+]
